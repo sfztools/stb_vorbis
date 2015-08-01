@@ -3148,6 +3148,20 @@ static int do_floor(vorb *f, Mapping *map, int i, int n, float *target, YTYPE *f
    return TRUE;
 }
 
+// The meaning of "left" and "right"
+//
+// For a given frame:
+//     we compute samples from 0..n
+//     window_center is n/2
+//     we'll window and mix the samples from left_start to left_end with data from the previous frame
+//     all of the samples from left_end to right_start can be output without mixing; however,
+//        this interval is 0-length except when transitioning between short and long frames
+//     all of the samples from right_start to right_end need to be mixed with the next frame,
+//        which we don't have, so those get saved in a buffer
+//     frame N's right_end-right_start, the number of samples to mix with the next frame,
+//        has to be the same as frame N+1's left_end-left_start (which they are by
+//        construction)
+
 static int vorbis_decode_initial(vorb *f, int *p_left_start, int *p_left_end, int *p_right_start, int *p_right_end, int *mode)
 {
    Mode *m;
